@@ -1,25 +1,34 @@
 
-import { OrbitControls, softShadows } from '@react-three/drei';
+import { OrbitControls, softShadows, MeshWobbleMaterial } from '@react-three/drei';
 import './App.scss';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import {useSpring, a} from '@react-spring/three';
 
 softShadows();
 
 //Builds spinning shapes (args is scale)
-const SpinningMesh = ({position, args, color})=>{
+const SpinningMesh = ({position, args, color, speed})=>{
     const mesh = useRef(null);
     useFrame(()=>(mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
 
+    const [expand, setExpand] = useState(false);
+    const props = useSpring({
+        scale: expand ? [1.4,1.4,1.4]:[1,1,1]
+    })    
+
     return (
-        <mesh
+        <a.mesh
+        onClick={()=>setExpand(!expand)}
+        scale={props.scale}
         castShadow
         receiveShadow
         position={position}
         ref={mesh}>
             <boxBufferGeometry attach="geometry" args={args} />
-            <meshStandardMaterial attach="material" color={color}/>
-        </mesh>
+            <MeshWobbleMaterial attach="material" color={color} speed={speed} factor={0.3}/>
+            
+        </a.mesh>
          )
 }
 
@@ -73,9 +82,9 @@ function App() {
 
             {/* Render Shapes */}
 
-            <SpinningMesh position={[0,1,0]} args={[3,2,1]} color="pink"/>
-            <SpinningMesh position={[-2,1,-5]} color="lightblue"/>
-            <SpinningMesh position={[5,1,-2]} color="lightblue"/>
+            <SpinningMesh position={[0,1,0]} args={[3,2,1]} color="pink" speed={5}/>
+            <SpinningMesh position={[-2,1,-5]} color="lightblue" speed={2}/>
+            <SpinningMesh position={[5,1,-2]} color="lightblue" speed={2}/>
             <OrbitControls />
         </Canvas>
   );
